@@ -9,7 +9,7 @@ const FormSubmission = require("./schemas");
 
 app.use(cors());
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
@@ -20,17 +20,20 @@ app.get("/", (req, res) => {
 app.post("/submit-form", async (req, res) => {
   const { name, email, message } = req.body;
   if (!name || !email || !message) {
-    return res.status(400).sendFile(path.join(__dirname, "failure.html"));
+    return res.json({ success: false });
   }
+
   try {
     const newSubmission = await FormSubmission.create({
       name,
       email,
       message,
     });
-    res.sendFile(path.join(__dirname, "public/success.html"));
+
+    res.json({ success: true });
   } catch (error) {
-    res.status(500).sendFile(path.join(__dirname, "public/error.html"));
+    console.error("Error creating form submission:", error);
+    res.json({ success: false });
   }
 });
 
